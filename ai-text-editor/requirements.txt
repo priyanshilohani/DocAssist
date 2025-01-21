@@ -1,0 +1,8 @@
+streamlit
+sentence-transformers
+transformers
+spacy
+pdfplumber
+python-docx
+torch
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
