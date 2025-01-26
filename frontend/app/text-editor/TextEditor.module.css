@@ -1,0 +1,68 @@
+.editorContainer {
+    width: 80%;
+    margin: auto;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 32px;
+  }
+  
+  .uploadSection {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .fileInput {
+    font-size: 16px;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+  }
+  
+  .loading {
+    color: #ff6347;
+    font-size: 18px;
+  }
+  
+  .editor {
+    margin-bottom: 20px;
+  }
+  
+  .textArea {
+    width: 100%;
+    height: 200px;
+    padding: 15px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: none;
+  }
+  
+  .suggestionsButton {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .suggestionsButton:hover {
+    background-color: #45a049;
+  }
+  
+  .suggestionsContainer {
+    margin-top: 20px;
+  }
+  
+  .suggestion {
+    font-size: 18px;
+    margin: 5px 0;
+  }
+  
