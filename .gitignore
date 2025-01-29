@@ -31,4 +31,4 @@ dist/
 
 # Logs
 *.log
-s
+node_modules/
