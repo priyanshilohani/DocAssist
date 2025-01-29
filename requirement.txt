@@ -1,0 +1,14 @@
+Flask
+flask-cors
+pymongo
+bcrypt
+pyjwt
+sentence-transformers
+transformers
+pdfplumber
+python-docx
+spacy
+numpy
+torch
+protobuf
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
