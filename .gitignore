@@ -32,3 +32,4 @@ dist/
 # Logs
 *.log
 node_modules/
+.next/
