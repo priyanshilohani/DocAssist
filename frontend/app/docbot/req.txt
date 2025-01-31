@@ -1,0 +1,7 @@
+langchain 
+langchain_community 
+PyPDF2 
+flask 
+flask-cors 
+InstructorEmbedding 
+faiss-cpu
