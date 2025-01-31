@@ -12,3 +12,13 @@ numpy
 torch
 protobuf
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
+jwt
+pymongo
+protobuf
+requests
+gunicorn
+pydantic
+tqdm
+flask-bcrypt
+flask-jwt-extended
+faiss-cpu  # If using FAISS for vector similarity search
