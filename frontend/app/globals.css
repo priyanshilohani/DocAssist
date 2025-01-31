@@ -38,7 +38,13 @@ body {
   font-weight: bold;
   color: #58A6FF;
   text-decoration: none;
+  
 }
+
+.logotext:hover{
+color:#6eaef8
+}
+
 
 .menu-links {
   display: flex;
