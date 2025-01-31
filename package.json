@@ -31,10 +31,19 @@
   "devDependencies": {
     "@types/draft-js": "^0.11.18",
     "@types/react": "^19.0.8",
+<<<<<<< HEAD
     "@types/react-dom": "^19.0.3",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.1.4",
     "prettier": "^3.1.0",
     "typescript": "^5.3.3"
+=======
+    "@types/react-dom": "^19.0.3"
+  },
+  "dependencies": {
+    "docx": "^9.1.1",
+    "file-saver": "^2.0.5",
+    "react-quill-new": "^3.3.3"
+>>>>>>> 459ab35 (Docbot frontend and backend)
   }
 }

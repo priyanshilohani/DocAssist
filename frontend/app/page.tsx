@@ -16,7 +16,7 @@ const Home = () => {
             <Link  className="logotext" href="/">DocAssist</Link>
           </div>
           <div className="menu">
-            <Link href="/loggedin" className="button contrast">Sign In</Link>
+            <Link href="/login" className="button contrast">Sign In</Link>
             <Link href="/signup" className="signup-button contrast">Sign Up</Link>
           </div>
           <div className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
