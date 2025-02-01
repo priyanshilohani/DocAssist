@@ -14,7 +14,6 @@
     "/docbot/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/docbot/page.css",
       "static/chunks/app/docbot/page.js"
     ],
     "/text-editor/page": [
