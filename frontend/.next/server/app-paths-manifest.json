@@ -1,5 +1,6 @@
 {
   "/text-editor/page": "app/text-editor/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/page": "app/page.js",
-  "/loggedin/page": "app/loggedin/page.js"
+  "/docbot/page": "app/docbot/page.js"
 }

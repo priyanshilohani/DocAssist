@@ -11,10 +11,11 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/loggedin/page": [
+    "/docbot/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/loggedin/page.js"
+      "static/css/app/docbot/page.css",
+      "static/chunks/app/docbot/page.js"
     ],
     "/text-editor/page": [
       "static/chunks/webpack.js",
