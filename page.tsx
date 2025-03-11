@@ -1,289 +1,240 @@
 "use client";
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { saveAs } from "file-saver";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import Image from "next/image";
+import Cookies from "js-cookie";
+import "quill/dist/quill.snow.css"; // Ensure Quill CSS is imported
+import "quill/dist/quill.snow.css";
 
-const Home = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [username, setUsername] = useState('User'); // Default value
-  const [userImage] = useState('/users.png'); // Default image (public image)
-  const router = useRouter();
+import styles from "./TextEditor.module.css";
 
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+
+export default function TextEditor() {
+  const [content, setContent] = useState("");
+  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [suggestions, setSuggestions] = useState<{ id: number; text: string }[]>([]);
+  const [documentChunks, setDocumentChunks] = useState<any[]>([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+  // Fetch token on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }});
-    // }
-    // try {
-    //   const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
-    //   setUsername(decodedToken.username || 'User');
-    //   // No need to set userImage from the token, as it's public now
-    // } catch (error) {
-    //   console.error('Error decoding token:', error);
-    //   localStorage.removeItem('token');
-    // }
-  // }, []);
-
-  const handleLogout = () => {
-    setIsLogoutModalOpen(true);
+    if (typeof window !== "undefined") {
+      let storedToken = Cookies.get("token") || localStorage.getItem("token");
+  
+      if (storedToken) {
+        try {
+          // Just setting the token without extracting userId
+          setToken(storedToken);
+        } catch (error) {
+          console.error("Error processing token:", error);
+          Cookies.remove("token");
+          localStorage.removeItem("token");
+        }
+      }
+    }
+  }, []);
+    
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ color: [ "#000000", "#e60000", "#ff9900", "#ffff00", "#008a00", "#0066cc", "#9933ff", "#ffffff", "#facccc", "#ffebcc", "#ffffcc", "#cce8cc", "#cce0f5", "#ebd6ff", "#bbbbbb", "#f06666", "#ffc266", "#ffff66", "#66b966", "#66a3e0", "#c285ff", "#888888", "#a10000", "#b26b00", "#b2b200", "#006100", "#0047b2", "#6b24b2", "#444444", "#5c0000", "#663d00", "#666600", "#003700", "#002966", "#3d1466", ] }],
+      ["blockquote", "code-block"],
+      ["clean"],
+    ],
   };
 
-  const confirmLogout = () => {
-    localStorage.removeItem('token');
-    setIsLogoutModalOpen(false);
-    router.push('/');
+  // Save document as .docx
+  const handleSave = async () => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const plainText = doc.body.textContent || "";
+
+    const wordDoc = new Document({
+      sections: [
+        {
+          children: [new Paragraph({ children: [new TextRun(plainText)] })],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(wordDoc);
+    saveAs(blob, `${documentTitle || "Untitled Document"}.docx`);
+  };
+
+  // Open a new document
+  const handleNewDocument = () => {
+    setContent(""); // Clears the editor
+    setDocumentTitle("Untitled Document");
+  };
+
+  // Copy text
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+  };
+
+  // Paste text
+  const handlePaste = async () => {
+    const text = await navigator.clipboard.readText();
+    setContent((prev) => prev + text);
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setFile(files[0]); // Store the uploaded file
+
+    if (!token) {
+      alert("You are not authenticated. Please log in.");
+      setUploading(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+
+    try {
+      const response = await fetch("http://localhost:5002/process-document", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text(); // Get error message
+        throw new Error(`Failed to process document: ${errorText}`);
+      }
+
+      const data = await response.json();
+      if (data.chunks) {
+        setDocumentChunks(data.chunks);
+        setUploadedFiles((prevFiles) => [...prevFiles, files[0].name]);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Fetch suggestions
+  const handleGetSuggestions = async () => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const plainText = doc.body.textContent?.trim() || "";
+
+    if (!plainText) {
+        alert("Editor content is empty!");
+        return;
+    }
+
+    if (!token) {
+        alert("You are not authenticated. Please log in.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5002/get-suggestions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ content: plainText }), // Ensure using "content"
+        });
+
+        const data = await response.json();
+        if (data.error) {
+            console.error("Error fetching suggestions:", data.error);
+        } else {
+          setSuggestions(
+            data.suggestions.map((s: { filename: string; content_snippet: string }, index: number) => ({
+              id: index,
+              text: `${s.content_snippet}`,
+            }))
+          );
+          
+        }
+    } catch (error) {
+        console.error("Error fetching suggestions:", error);
+    }
+};
+// Accept suggestion
+  const handleAcceptSuggestion = (suggestionText: string) => {
+    const plainText = suggestionText.replace(/•/g, "").replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+    setContent(content + " " + plainText);
   };
 
   return (
-    <div>
-      {/* Navigation Bar */}
-      <nav className="navbar">
-        <div className="navbar-container">
-          <div className="logo">
-            <Link href="/">DocAssist</Link>
-          </div>
-          <div className="menu">
-            <div className="user-profile">
-              <div className="profile-icon" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-                <Image src={userImage} alt="User Profile" width={40} height={40} />
-              </div>
-              {isDropdownOpen && (
-                <div className="dropdown-menu">
-                  <p className="dropdown-item">
-                     {username}</p>
-                  <hr />
-                  <Link href="/settings" className="dropdown-item">⚙️ Settings</Link>
-                  <button onClick={handleLogout} className="dropdown-item logout">🚪 Logout</button>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle navigation">
-            <div className="bar"></div>
-            <div className="bar"></div>
-            <div className="bar"></div>
+    <div className={styles["editor-container"]}>
+      {/* Top Menu Bar */}
+      <div className={styles["top-bar"]}>
+        <input type="text" value={documentTitle} onChange={(e) => setDocumentTitle(e.target.value)} className={styles["file-name-input"]} />
+
+        <div className={styles["menu"]}>
+          <span>File</span>
+          <div className={styles["dropdown"]}>
+            <button onClick={handleSave}>
+              <Image src="/folder-download.png" width={20} height={20} alt="Save" /> Save Document
+            </button>
+            <button onClick={handleNewDocument}>
+              <Image src="/add-document.png" width={20} height={20} alt="New" /> Open New Document
+            </button>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* Hero Section */}
-      <header className="hero">
-        <h1>Welcome to DocAssist</h1>
-        <p>Simplify your note-taking and document management with our all-in-one platform.</p>
-        <div className="hero-buttons">
-          <Link href="#features" className="button">Explore Features</Link>
-        </div>
-      </header>
+      <div className={styles["layout-container"]}>
+        <div className={styles["suggestions-panel"]}>
+          <h3>Suggestions</h3>
+          <label htmlFor="file-upload" className={styles["file-upload-label"]} style={{ cursor: "pointer" }}>
+            <Image src="/upload.png" width={25} height={25} alt="Upload File" className={styles["upload-icon"]} />
+          </label>
+          <input id="file-upload" type="file" multiple onChange={handleFileUpload} accept=".pdf,.txt,.docx" style={{ display: "none" }} />
+          {uploading && <p>Uploading...</p>}
+          {uploadedFiles.map((fileName, index) => (
+            <div key={index} className={styles["file-name-item"]}>{fileName}</div>
+          ))}
+          <button className={styles["suggestions-btn"]} onClick={handleGetSuggestions}>
+            <Image src="/suggestion.png" width={40} height={40} alt="Suggestions" className={styles["suggestion-icon"]} />
+          </button>
+          <ul>
+  {suggestions.length === 0 ? (
+    <p>No suggestions available</p>
+  ) : (
+    suggestions.map((suggestion) => (
+      <li key={suggestion.id}>
+        <pre>{suggestion.text}</pre>
+        <button onClick={() => handleAcceptSuggestion(suggestion.text)}>Accept</button>
+      </li>
+    ))
+  )}
+</ul>
 
-      {/* Logout Confirmation Modal */}
-      {isLogoutModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsLogoutModalOpen(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <p>Are you sure you want to log out?</p>
-            <div className="modal-buttons">
-              <button onClick={confirmLogout} className="confirm-btn">Yes</button>
-              <button onClick={() => setIsLogoutModalOpen(false)} className="cancel-btn">No</button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* About Us Section */}
-      <section id="about-us" className="about-us">
-        <h2>About DocAssist</h2>
-        <p>Designed as part of a final year project, DocAssist integrates cutting-edge AI to provide an intuitive and seamless user experience.</p>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="how-it-works">
-        <h2>How It Works</h2>
-        <div className="steps">
-          <div className="step">
-            <h3>1. AI Text Editor</h3>
-            <p>Write effortlessly with smart suggestions, formatting options, and document styling.</p>
-          </div>
-          <div className="step">
-            <h3>2. DocBot Assistant</h3>
-            <p>Organize your thoughts, find documents quickly, and get personalized assistance.</p>
-          </div>
-          <div className="step">
-            <h3>3. Notes Drive</h3>
-            <p>Securely store, organize, and retrieve your notes anytime, anywhere.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="features">
-        <h2>Features</h2>
-        <div className="feature">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <Image 
-                className="img-feature"
-                src="/featueimg1.svg" 
-                alt="AI Text Editor" 
-                width={500} 
-                height={300} 
-              />
-            </div>
-          </div>
-          <div className="feature-content">
-            <h3>
-              <Link href="/text-editor">AI-Powered Text Editor</Link>
-            </h3>
-            <p>Enhance your writing experience with advanced editing tools and AI-powered suggestions.</p>
-          </div>
         </div>
 
-        <div className="feature reverse">
-          <div className="feature-content">
-            <h3>
-              <Link href="/docbot">DocBot Assistant</Link>
-            </h3>
-            <p>Find documents, organize thoughts, and let AI simplify your workflow.</p>
-          </div>
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <Image 
-                className="img-feature"
-                src="/docbot-feature-img.svg" 
-                alt="DocBot Assistant" 
-                width={500} 
-                height={300} 
-              />
-            </div>
-          </div>
+        {/* Text Editor */}
+        <div className={styles["editor-area"]}>
+        <ReactQuill value={content} onChange={(value) => setContent(value)} theme="snow" modules={modules} />
         </div>
-
-        <div className="feature">
-          <div className="feature-image">
-            <div className="image-placeholder">
-              <Image 
-                className="img-feature"
-                src="/storage-img.svg" 
-                alt="Notes Drive" 
-                width={500} 
-                height={300} 
-              />
-            </div>
-          </div>
-          <div className="feature-content">
-            <h3>
-              <Link href="/storage">Notes Drive</Link>
-            </h3>
-            <p>Safely store and access your notes anywhere, anytime.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <p>&copy; {new Date().getFullYear()} DocAssist. All rights reserved.</p>
-      </footer>
-
-      <style jsx>{`
-        /* Dropdown menu styling */
-        .dropdown-menu {
-          position: absolute;
-          top: 50px;
-          right: 10px;
-          background: #161B22;
-          border: 1px solid #ccc;
-          border-radius: 8px;
-          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-          padding: 10px;
-          width: 180px;
-          z-index: 1000;
-        }
-        
-        .dropdown-item {
-          display: block;
-          padding: 10px;
-          color: white;
-          text-decoration: none;
-          transition: background 0.3s;
-        }
-
-        .dropdown-item:hover {
-          background:rgb(151, 190, 222);
-        }
-
-        .logout {
-          margin-top: 8px; /* Adds gap between Settings and Logout */
-          background: none;
-          border: none;
-          cursor: pointer;
-          width: 100%;
-          text-align: left;
-          color: red;
-          font-weight: bold;
-        }
-
-        /* Modal overlay */
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.4);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-        }
-
-        /* Modal box */
-        .modal {
-          background: #161B22;
-          padding: 20px;
-          border-radius: 10px;
-          width: 320px;
-          text-align: center;
-          box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-buttons {
-          margin-top: 15px;
-          display: flex;
-          justify-content: space-evenly;
-        }
-
-        .confirm-btn {
-          background: red;
-          color: white;
-          border: none;
-          padding: 8px 15px;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-
-        .cancel-btn {
-          background: grey;
-          color: white;
-          border: none;
-          padding: 8px 15px;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-
-        .confirm-btn:hover {
-          background: darkred;
-        }
-
-        .cancel-btn:hover {
-          background: darkgrey;
-        }
-      `}</style>
+      </div>
     </div>
-
-
   );
-};
+}
 
-export default Home;
