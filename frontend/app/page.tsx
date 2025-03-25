@@ -51,31 +51,6 @@ const Home = () => {
         </p>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="how-it-works">
-        <h2>How It Works</h2>
-        <div className="steps">
-          <div className="step">
-            <h3>1. AI Text Editor</h3>
-            <p>
-              Write effortlessly with smart suggestions, formatting options, and document styling.
-            </p>
-          </div>
-          <div className="step">
-            <h3>2. DocBot Assistant</h3>
-            <p>
-              Organize your thoughts, find documents quickly, and get personalized assistance.
-            </p>
-          </div>
-          <div className="step">
-            <h3>3. Notes Drive</h3>
-            <p>
-              Securely store, organize, and retrieve your notes anytime, anywhere.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section id="features" className="features">
         <h2>Features</h2>
@@ -122,6 +97,48 @@ const Home = () => {
           </div>
         </div>
 
+        <div className="feature reverse">
+          <div className="feature-content">
+            <h3>
+              <Link href="/paraphrase">Paraphraser</Link>
+            </h3>
+            <p>
+              Easily rephrase and refine your text for clarity and originality.
+            </p>
+          </div>
+          <div className="feature-image">
+            <div className="image-placeholder">
+              <Image className='img-feature'
+                src="/writer.png" 
+                alt="AI Paraphraser" 
+                width={500} 
+                height={300} 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="feature reverse">
+          <div className="feature-content">
+            <h3>
+              <Link href="/ocr">OCR Text Extraction</Link>
+            </h3>
+            <p>
+              Extract text from images easily with our Optical Character Recognition (OCR) tool.
+            </p>
+          </div>
+          <div className="feature-image">
+            <div className="image-placeholder">
+              <Image className="img-feature"
+                src="/phone.png" 
+                alt="OCR Feature" 
+                width={500} 
+                height={300} 
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="feature">
           <div className="feature-image">
             <div className="image-placeholder">
@@ -140,6 +157,18 @@ const Home = () => {
             <p>
               Safely store and access your notes anywhere, anytime.
             </p>
+          </div>
+        </div>
+
+        <div className="feature">
+          <div className="feature-image">
+            <div className="image-placeholder">
+              <Image className='img-feature' src="/web-design.png" alt="Research Paper Templates" width={500} height={500} />
+            </div>
+          </div>
+          <div className="feature-content">
+            <h3><Link href="/template">Research Paper Templates</Link></h3>
+            <p>Select and edit research paper templates tailored to various journals.</p>
           </div>
         </div>
       </section>

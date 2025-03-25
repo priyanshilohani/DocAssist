@@ -19,14 +19,20 @@ const DocBot = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question: chat }),
+        body: JSON.stringify({
+          user_input: chat,
+          document_chunks: processedChunks, // Store chunks from file upload
+        }),
       });
       const data = await response.json();
 
-    setMessages((prev) =>
-      prev.slice(0, -1).concat({ user: chat, bot: data.answer || "Error getting response" })
-    );
-  } catch (error) {
+      setMessages((prev) =>
+        prev.slice(0, -1).concat({
+          user: chat,
+          bot: data.length > 0 ? data.map((item: { bullet_point: string }) => `• ${item.bullet_point}`).join("\n") : "No relevant information found.",
+        })
+      );
+    } catch (error) {
     console.error("Error fetching response:", error);
     setMessages((prev) =>
       prev.slice(0, -1).concat({ user: chat, bot: "Failed to get response from AI." })
@@ -35,18 +41,46 @@ const DocBot = () => {
     setChat('');
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [processedChunks, setProcessedChunks] = useState<any[]>([]);
+  
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      setIsProcessing(true);
-      const uploadedFiles = Array.from(files).map(file => file.name);
-      setFileNames(prev => [...prev, ...uploadedFiles]);
-      setMessages([...messages, { user: 'Uploaded Files', bot: 'Processing files...' }]);
-      
-      setTimeout(() => {
-        setMessages(prev => prev.slice(0, -1).concat({ user: 'Uploaded Files', bot: 'Files processed successfully!' }));
-        setIsProcessing(false);
-      }, 3000);
+    if (!files) return;
+  
+    setIsProcessing(true);
+  
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append("file", file));
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/process-document", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await response.json();
+  
+      if (data.chunks) {
+        setProcessedChunks(data.chunks); // Store document chunks
+        setFileNames((prev) => [...prev, ...Array.from(files).map((file) => file.name)]);
+        setMessages((prev) => [
+          ...prev,
+          { user: "Uploaded Files", bot: "Files processed successfully! You can now ask questions." },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { user: "Uploaded Files", bot: "Error processing files." },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setMessages((prev) => [
+        ...prev,
+        { user: "Uploaded Files", bot: "Failed to process file." },
+      ]);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -106,7 +140,7 @@ const DocBot = () => {
         onClick={() => setSidebarOpen(true)}
         className="hamburger-btn"
       >
-        <FiMenu size={24} />
+      <FiMenu size={24} className="hamburger-icon" />
       </button>
 
       {/* Main Chat Section */}
@@ -117,15 +151,33 @@ const DocBot = () => {
             <p className="empty-chat">No chat history. Ask a question!</p>
           ) : (
             messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`chat-message ${msg.user === 'Uploaded Files' ? 'centered' : ''}`}
-              >
-                <div className={`message-bubble ${msg.user === 'Uploaded Files' ? 'file-message' : ''}`}>
-                  <p className="message-text"><strong>{msg.user}:</strong> {msg.bot}</p>
+              <div key={index} className="chat-message">
+                <div className="message-bubble">
+                  <div className="message-text">
+                    <strong>{msg.user}:</strong>
+                    {msg.bot.includes("•") ? (
+                      <ul>
+                        {msg.bot.split("\n").map((point, i) => (
+                          <li key={i}>{point}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>{msg.bot}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
+            // messages.map((msg, index) => (
+            //   <div
+            //     key={index}
+            //     className={`chat-message ${msg.user === 'Uploaded Files' ? 'centered' : ''}`}
+            //   >
+            //     <div className={`message-bubble ${msg.user === 'Uploaded Files' ? 'file-message' : ''}`}>
+            //       <p className="message-text"><strong>{msg.user}:</strong> {msg.bot}</p>
+            //     </div>
+            //   </div>
+            // ))
           )}
         </div>
 

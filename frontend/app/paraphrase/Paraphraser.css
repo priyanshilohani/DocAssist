@@ -1,0 +1,91 @@
+   .paraphraser-container {
+    display: flex;
+    gap: 20px;
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .input-section, .output-section {
+    flex: 1;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .input-section {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+    font-size: 16px;
+  }
+  
+  button {
+    margin-top: 10px;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  button:hover {
+    background: #0056b3;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .output-section h2, .input-section h2 {
+    margin-bottom: 10px;
+  }
+  
+  .paraphrase-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .paraphrase-item input {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  
+  .paraphrased-text {
+    font-size: 16px;
+    background: #e6f7ff;
+    padding: 10px;
+    border-left: 4px solid #007bff;
+  }
+  
+  .placeholder {
+    color: #999;
+    font-style: italic;
+  }
+  
+  ul {
+    padding-left: 20px;
+  }
+  
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  

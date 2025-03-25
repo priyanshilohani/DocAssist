@@ -1,0 +1,18 @@
+Methodology
+1. We used advanced parsing methods.
+2. Data was preprocessed using NLTK.
+
+Abstract
+This research automates the IEEE paper formatting process.
+
+Results
+Our system achieved 95% accuracy in section classification.
+
+Introduction
+Manual formatting is time-consuming. Automating it increases productivity.
+
+Conclusion
+This approach reduces human effort and improves consistency.
+
+Literature Review
+Existing systems lack proper automation. Our model addresses these issues.

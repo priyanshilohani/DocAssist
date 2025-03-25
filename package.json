@@ -14,25 +14,29 @@
     "autoprefixer": "^10.4.20",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
+    "docx": "^9.1.1",
     "draft-js": "^0.11.7",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.0.0",
     "huggingface": "^1.4.0",
+    "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "langchain": "^0.3.10",
     "lucide-react": "^0.360.0",
     "next": "^15.1.6",
     "postcss": "^8.4.49",
+    "quill": "^2.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
     "react-quill": "^2.0.0",
+    "react-quill-new": "^3.3.3",
     "tailwindcss": "^3.4.17",
     "zustand": "^4.5.0"
-    ,"docx": "^9.1.1",
-    "file-saver": "^2.0.5",
-    "react-quill-new": "^3.3.3"
   },
   "devDependencies": {
     "@types/draft-js": "^0.11.18",
+    "@types/js-cookie": "^3.0.6",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3"
   }

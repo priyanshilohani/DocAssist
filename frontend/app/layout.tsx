@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+// import Document, { Html, Head, Main, NextScript } from 'next/document';
 <link
   href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Inter&display=swap"
   rel="stylesheet"

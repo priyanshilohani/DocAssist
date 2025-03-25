@@ -6,7 +6,7 @@ const Storage = () => {
     { id: 1, name: 'Document 1' },
     { id: 2, name: 'Document 2' },
     { id: 3, name: 'Document 3' },
-    {id:4, name:'Document 4'},
+    { id: 4, name: 'Document 4' },
   ]);
   const [selectedDocs, setSelectedDocs] = useState<number[]>([]);
 
@@ -22,11 +22,6 @@ const Storage = () => {
     const updatedDocs = documents.filter((doc) => !selectedDocs.includes(doc.id));
     setDocuments(updatedDocs);
     setSelectedDocs([]);
-  };
-
-  const handleUpload = () => {
-    // Logic to handle file upload
-    alert('Upload functionality goes here!');
   };
 
   return (
@@ -52,7 +47,6 @@ const Storage = () => {
         )}
       </div>
       <div style={styles.buttonGroup}>
-     
         {selectedDocs.length > 0 && (
           <button onClick={handleDelete} style={styles.deleteButton}>
             Delete Selected Documents
@@ -62,7 +56,7 @@ const Storage = () => {
     </div>
   );
 };
-
+// const CENTRE="centre"
 const styles = {
   container: {
     padding: '20px',
@@ -71,10 +65,10 @@ const styles = {
     width: '90%',
     margin: '0 auto',
     color: '#C9D1D9',
-    height:'100%',
+    height: '100%',
   },
   header: {
-    textAlign: 'center' as 'center', // Explicitly defining 'center' type for textAlign
+    // textAlign: CENTRE, // Explicitly typed 'center' as string literal
     color: '#58A6FF',
     marginBottom: '20px',
   },
@@ -82,7 +76,7 @@ const styles = {
     marginBottom: '20px',
   },
   noDocs: {
-    textAlign: 'center' as 'center', // Explicitly defining 'center' type for textAlign
+    // textAlign: CENTRE, // Explicitly typed 'center' as string literal
     color: '#8B949E',
   },
   ul: {
@@ -103,15 +97,6 @@ const styles = {
     justifyContent: 'space-between',
     gap: '10px',
   },
-  uploadButton: {
-    backgroundColor: '#58A6FF',
-    color: '#161B22',
-    border: 'none',
-    padding: '12px 25px',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
   deleteButton: {
     backgroundColor: '#FF5C5C',
     color: '#161B22',
@@ -122,5 +107,7 @@ const styles = {
     transition: 'background-color 0.3s',
   },
 };
+
+ 
 
 export default Storage;
